@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Keuangan UMKM - SAK EMKM & POS Bengkel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0b0f19; color: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar">
+
+    <!-- LOGIN & REGISTER MODAL -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="glass-card w-full max-w-md p-8 rounded-2xl shadow-2xl border border-slate-700/50">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-tr from-teal-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-teal-500/30 mb-3">
+                    <i class="fa-solid fa-store text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white tracking-wide">Sistem Keuangan UMKM</h2>
+                <p class="text-xs text-slate-400 mt-1">Standar SAK EMKM & POS Kasir Terintegrasi</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Email / Username</label>
+                    <input type="text" id="loginEmail" value="pemilik@bengkel.com" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Kata Sandi</label>
+                    <input type="password" id="loginPassword" value="123456" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-medium py-2.5 rounded-lg text-sm shadow-lg shadow-teal-500/20 transition duration-200">
+                    Masuk ke Sistem Pembukuan
+                </button>
+                <div class="text-center pt-2">
+                    <button type="button" onclick="toggleAuthMode('register')" class="text-xs text-teal-400 hover:underline">Belum punya akun? Daftar Akun UMKM Baru</button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nama Pemilik / Pengelola</label>
+                    <input type="text" id="regName" placeholder="Contoh: Budi Santoso" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Email</label>
+                    <input type="email" id="regEmail" placeholder="nama@bengkel.com" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Nama Usaha / Bengkel UMKM</label>
+                    <input type="text" id="regBusiness" placeholder="Contoh: Jaya Maju Motor" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Kata Sandi Baru</label>
+                    <input type="password" id="regPassword" placeholder="******" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+                </div>
+                <button type="submit" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-2.5 rounded-lg text-sm shadow-lg shadow-teal-500/20 transition duration-200">
+                    Daftar & Buat Akun UMKM
+                </button>
+                <div class="text-center pt-2">
+                    <button type="button" onclick="toggleAuthMode('login')" class="text-xs text-teal-400 hover:underline">Sudah punya akun? Login Kembali</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="flex-1 flex overflow-hidden hidden">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
+            <div>
+                <!-- Brand Logo -->
+                <div class="p-5 border-b border-slate-800/80 flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-teal-500 rounded-xl flex items-center justify-center text-white font-bold shadow-md shadow-teal-500/30">
+                        <i class="fa-solid fa-calculator text-sm"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-sm text-white tracking-wide leading-tight">Sistem UMKM</h1>
+                        <span class="text-[10px] text-teal-400 font-semibold uppercase tracking-wider">SAK EMKM (FIFO)</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="p-3 space-y-1">
+                    <div class="px-3 py-1 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Utama</div>
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-chart-pie w-5 text-center text-teal-400"></i>
+                        <span>Dashboard UMKM</span>
+                    </button>
+                    <button onclick="openPosModal()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium bg-gradient-to-r from-teal-500 to-emerald-600 text-white hover:opacity-90 shadow-lg shadow-teal-500/20 transition my-2">
+                        <i class="fa-solid fa-cash-register w-5 text-center"></i>
+                        <span class="font-bold">Kasir POS (Direct Sales)</span>
+                    </button>
+
+                    <div class="px-3 py-1 text-[11px] font-semibold text-slate-500 uppercase tracking-wider pt-2">Operasional</div>
+                    <button onclick="switchTab('master')" id="nav-master" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center text-slate-400"></i>
+                        <span>Master Barang & Jasa</span>
+                    </button>
+                    <button onclick="switchTab('purchases')" id="nav-purchases" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-truck-ramp-box w-5 text-center text-slate-400"></i>
+                        <span>Pembelian Stok (Purchases)</span>
+                    </button>
+                    <button onclick="switchTab('adjustments')" id="nav-adjustments" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-sliders w-5 text-center text-slate-400"></i>
+                        <span>Penyesuaian Stok (Adjustment)</span>
+                    </button>
+
+                    <div class="px-3 py-1 text-[11px] font-semibold text-slate-500 uppercase tracking-wider pt-2">Siklus Akuntansi</div>
+                    <button onclick="switchTab('journals')" id="nav-journals" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-book w-5 text-center text-indigo-400"></i>
+                        <span>Jurnal Umum & Penyesuaian</span>
+                    </button>
+                    <button onclick="switchTab('ledger')" id="nav-ledger" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-vault w-5 text-center text-indigo-400"></i>
+                        <span>Buku Besar (General Ledger)</span>
+                    </button>
+                    <button onclick="switchTab('trialbalance')" id="nav-trialbalance" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-scale-balanced w-5 text-center text-amber-400"></i>
+                        <span>Neraca Saldo & NSSP</span>
+                    </button>
+                    <button onclick="switchTab('financials')" id="nav-financials" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                        <i class="fa-solid fa-file-invoice-dollar w-5 text-center text-emerald-400"></i>
+                        <span>Laporan Keuangan & CALK</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Profile & Reset -->
+            <div class="p-3 border-t border-slate-800 space-y-2">
+                <button onclick="resetDataToDefault()" class="w-full text-left px-3 py-2 text-[11px] text-red-400 hover:bg-red-950/30 rounded-lg flex items-center space-x-2">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Reset Data & Perbaiki Pembukuan</span>
+                </button>
+                <div class="flex items-center justify-between p-2 bg-slate-800/60 rounded-xl border border-slate-700/50">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white text-xs">
+                            <span id="userAvatar">U</span>
+                        </div>
+                        <div class="overflow-hidden">
+                            <p id="userNameDisplay" class="text-xs font-bold text-white truncate">User</p>
+                            <p id="userBusinessDisplay" class="text-[10px] text-slate-400 truncate">Bengkel</p>
+                        </div>
+                    </div>
+                    <button onclick="openProfileModal()" class="text-slate-400 hover:text-white p-1 text-xs">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-950">
+            <!-- HEADER BAR -->
+            <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-800 gap-4">
+                <div>
+                    <h2 id="pageTitle" class="text-2xl font-bold text-white">Dashboard Keuangan UMKM</h2>
+                    <p id="headerBusinessSubtitle" class="text-xs text-teal-400 mt-1 font-semibold">Usaha: Jaya Maju Motor (Sistem SAK EMKM)</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg flex items-center space-x-2 text-xs">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-slate-300">Periode: Oktober 2026</span>
+                    </div>
+                    <button onclick="handleLogout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs flex items-center space-x-2 border border-slate-700">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Keluar</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: DASHBOARD -->
+            <section id="tab-dashboard" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="glass-card p-5 rounded-xl border-l-4 border-l-teal-500">
+                        <p class="text-xs text-slate-400 font-medium">Total Kas & Bank</p>
+                        <h3 id="dashKas" class="text-xl font-bold text-white mt-1">Rp 0</h3>
+                        <p class="text-[11px] text-emerald-400 mt-2 flex items-center"><i class="fa-solid fa-shield-halved mr-1"></i> Likuiditas Terjaga</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl border-l-4 border-l-blue-500">
+                        <p class="text-xs text-slate-400 font-medium">Nilai Persediaan (FIFO)</p>
+                        <h3 id="dashPersediaan" class="text-xl font-bold text-white mt-1">Rp 0</h3>
+                        <p class="text-[11px] text-slate-400 mt-2">10 Barang Dagangan Utama</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl border-l-4 border-l-indigo-500">
+                        <p class="text-xs text-slate-400 font-medium">Total Pendapatan (Sales & Jasa)</p>
+                        <h3 id="dashPendapatan" class="text-xl font-bold text-white mt-1">Rp 0</h3>
+                        <p class="text-[11px] text-emerald-400 mt-2">10 Penjualan + 5 Jasa Servis</p>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl border-l-4 border-l-emerald-500">
+                        <p class="text-xs text-slate-400 font-medium">Laba Bersih Periode Ini</p>
+                        <h3 id="dashLaba" class="text-xl font-bold text-emerald-400 mt-1">Rp 0</h3>
+                        <p class="text-[11px] text-slate-400 mt-2">Setelah HPP FIFO & Opnam</p>
+                    </div>
+                </div>
+
+                <!-- Financial Ratios & Trends -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-5 rounded-2xl lg:col-span-2">
+                        <h4 class="text-sm font-bold text-white mb-4">Grafik Tren Kinerja Keuangan UMKM</h4>
+                        <div class="h-64">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card p-5 rounded-2xl flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white mb-3">Analisis Rasio Keuangan</h4>
+                            <div class="space-y-3 text-xs">
+                                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <span class="text-slate-400">Rasio Kas (Current Ratio)</span>
+                                    <span id="ratioCash" class="font-bold text-teal-400">1.8x (Sehat)</span>
+                                </div>
+                                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <span class="text-slate-400">Margin Laba Bersih</span>
+                                    <span id="ratioMargin" class="font-bold text-emerald-400">0%</span>
+                                </div>
+                                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <span class="text-slate-400">Return on Assets (ROA)</span>
+                                    <span id="ratioRoa" class="font-bold text-indigo-400">0%</span>
+                                </div>
+                                <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 flex justify-between items-center">
+                                    <span class="text-slate-400">Debt to Equity (DER)</span>
+                                    <span id="ratioDer" class="font-bold text-amber-400">0.0x</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-teal-950/40 border border-teal-800/50 rounded-xl mt-4">
+                            <p class="text-xs text-teal-300 font-semibold mb-0.5"><i class="fa-solid fa-circle-check mr-1"></i> Status: KEUANGAN SEHAT</p>
+                            <p class="text-[10px] text-teal-200/70">Pembukuan berbasis SAK EMKM terintegrasi otomatis.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: MASTER BARANG & JASA -->
+            <section id="tab-master" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white">Daftar Barang Dagangan (10) & Jasa Servis (5)</h3>
+                    <button onclick="openMasterModal()" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1 shadow-md">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Item Baru</span>
+                    </button>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Kode</th>
+                                    <th class="p-3">Nama Item</th>
+                                    <th class="p-3">Kategori</th>
+                                    <th class="p-3">Harga Beli</th>
+                                    <th class="p-3">Harga Jual</th>
+                                    <th class="p-3">Stok Sisa</th>
+                                    <th class="p-3 text-center">Aksi (CRUD)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: PEMBELIAN STOK -->
+            <section id="tab-purchases" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white">Transaksi Pembelian Stok (Purchases)</h3>
+                    <button onclick="openPurchaseModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1 shadow-md">
+                        <i class="fa-solid fa-cart-plus"></i>
+                        <span>Catat Pembelian Baru</span>
+                    </button>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">No. Faktur</th>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">Supplier</th>
+                                    <th class="p-3">Item Barang</th>
+                                    <th class="p-3">Qty</th>
+                                    <th class="p-3">Total Harga</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: ADJUSTMENT STOK OPNAM -->
+            <section id="tab-adjustments" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white">Penyesuaian / Opnam Persediaan (10 Sampel)</h3>
+                    <button onclick="openAdjustmentModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center space-x-1 shadow-md">
+                        <i class="fa-solid fa-sliders"></i>
+                        <span>Input Penyesuaian</span>
+                    </button>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">No. Adjustment</th>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">Barang Dagangan</th>
+                                    <th class="p-3">Selisih Qty</th>
+                                    <th class="p-3">Nilai Kerugian</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adjustmentTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: JURNAL OTOMATIS -->
+            <section id="tab-journals" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white">Jurnal Umum & Jurnal Penyesuaian Otomatis</h3>
+                    <span class="text-xs text-slate-400">Posting otomatis dari seluruh transaksi</span>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">No. Bukti</th>
+                                    <th class="p-3">Keterangan / Akun COA</th>
+                                    <th class="p-3 text-right">Debit (Rp)</th>
+                                    <th class="p-3 text-right">Kredit (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="journalTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: BUKU BESAR -->
+            <section id="tab-ledger" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="text-base font-bold text-white">Buku Besar Per Akun (General Ledger)</h3>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs text-slate-400">Pilih Akun COA:</label>
+                        <select id="ledgerCoaFilter" onchange="renderLedger()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Tanggal</th>
+                                    <th class="p-3">No. Bukti</th>
+                                    <th class="p-3">Keterangan</th>
+                                    <th class="p-3 text-right">Debit</th>
+                                    <th class="p-3 text-right">Kredit</th>
+                                    <th class="p-3 text-right">Saldo Akhir</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledgerTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 7: NERACA SALDO & NSSP -->
+            <section id="tab-trialbalance" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-base font-bold text-white">Neraca Saldo & Neraca Saldo Setelah Penyesuaian (NSSP)</h3>
+                    <span class="text-xs text-slate-400">Kertas Kerja Lengkap SAK EMKM</span>
+                </div>
+                <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] border-b border-slate-800">
+                                <tr>
+                                    <th class="p-3">Kode COA</th>
+                                    <th class="p-3">Nama Akun</th>
+                                    <th class="p-3 text-right">Neraca Saldo (D)</th>
+                                    <th class="p-3 text-right">Neraca Saldo (K)</th>
+                                    <th class="p-3 text-right">Penyesuaian (D)</th>
+                                    <th class="p-3 text-right">Penyesuaian (K)</th>
+                                    <th class="p-3 text-right">NSSP (D)</th>
+                                    <th class="p-3 text-right">NSSP (K)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trialBalanceTableBody" class="divide-y divide-slate-800">
+                                <!-- Loaded by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 8: LAPORAN KEUANGAN SAK EMKM -->
+            <section id="tab-financials" class="tab-content space-y-6 hidden">
+                <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 p-3 rounded-xl border border-slate-800">
+                    <div class="flex space-x-2 overflow-x-auto">
+                        <button onclick="switchReportTab('labarugi')" id="reportTab-labarugi" class="report-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-teal-500 text-white">Laba Rugi</button>
+                        <button onclick="switchReportTab('neraca')" id="reportTab-neraca" class="report-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Posisi Keuangan (Neraca)</button>
+                        <button onclick="switchReportTab('aruskas')" id="reportTab-aruskas" class="report-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Arus Kas</button>
+                        <button onclick="switchReportTab('ekuitas')" id="reportTab-ekuitas" class="report-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">Perubahan Ekuitas</button>
+                        <button onclick="switchReportTab('calk')" id="reportTab-calk" class="report-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white">CALK SAK EMKM</button>
+                    </div>
+                    <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 flex items-center space-x-1">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak Laporan</span>
+                    </button>
+                </div>
+
+                <!-- 1. LABA RUGI -->
+                <div id="reportView-labarugi" class="report-subview glass-card p-6 rounded-2xl max-w-3xl mx-auto space-y-4">
+                    <div class="text-center border-b border-slate-800 pb-4">
+                        <h3 id="reportCompany1" class="font-bold text-lg text-white">Jaya Maju Motor</h3>
+                        <p class="text-xs font-semibold text-teal-400 uppercase tracking-wider">LAPORAN LABA RUGI</p>
+                        <p class="text-[11px] text-slate-400">Untuk Periode yang Berakhir 31 Oktober 2026</p>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">PENDAPATAN USAHA</div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Pendapatan Penjualan Suku Cadang/Barang</span>
+                            <span id="rptSalesRev">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Pendapatan Jasa Servis Bengkel</span>
+                            <span id="rptServiceRev">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-teal-400 pt-1 border-t border-slate-800">
+                            <span>TOTAL PENDAPATAN</span>
+                            <span id="rptTotalRev">Rp 0</span>
+                        </div>
+
+                        <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1 pt-3">BEBAN POKOK & OPERASIONAL</div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Harga Pokok Penjualan (HPP FIFO)</span>
+                            <span id="rptHpp">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Beban Kerugian Selisih Persediaan (Opnam)</span>
+                            <span id="rptBebanAdjustment">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-red-400 pt-1 border-t border-slate-800">
+                            <span>TOTAL BEBAN</span>
+                            <span id="rptTotalExpense">Rp 0</span>
+                        </div>
+
+                        <div class="flex justify-between text-sm font-bold bg-teal-950/60 p-3 rounded-xl border border-teal-800/80 text-emerald-400 mt-4">
+                            <span>LABA BERSIH PERIODE BERJALAN</span>
+                            <span id="rptNetProfit">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. NERACA -->
+                <div id="reportView-neraca" class="report-subview glass-card p-6 rounded-2xl max-w-3xl mx-auto space-y-4 hidden">
+                    <div class="text-center border-b border-slate-800 pb-4">
+                        <h3 id="reportCompany2" class="font-bold text-lg text-white">Jaya Maju Motor</h3>
+                        <p class="text-xs font-semibold text-teal-400 uppercase tracking-wider">LAPORAN POSISI KEUANGAN (NERACA)</p>
+                        <p class="text-[11px] text-slate-400">Per 31 Oktober 2026</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                        <!-- ASET -->
+                        <div class="space-y-2">
+                            <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">ASET (AKTIVA)</div>
+                            <div class="flex justify-between pl-2">
+                                <span>Kas & Bank</span>
+                                <span id="neracaKas">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between pl-2">
+                                <span>Persediaan Barang Dagangan (FIFO)</span>
+                                <span id="neracaPersediaan">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between pl-2">
+                                <span>Peralatan & Mesin Bengkel</span>
+                                <span>Rp 15.000.000</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-teal-400 pt-2 border-t border-slate-800">
+                                <span>TOTAL ASET</span>
+                                <span id="neracaTotalAset">Rp 0</span>
+                            </div>
+                        </div>
+                        <!-- KEWAJIBAN & EKUITAS -->
+                        <div class="space-y-2">
+                            <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">LIABILITAS & EKUITAS</div>
+                            <div class="flex justify-between pl-2">
+                                <span>Utang Usaha</span>
+                                <span>Rp 0</span>
+                            </div>
+                            <div class="flex justify-between pl-2">
+                                <span>Modal Pemilik</span>
+                                <span>Rp 50.000.000</span>
+                            </div>
+                            <div class="flex justify-between pl-2">
+                                <span>Laba Ditahan / Periode Berjalan</span>
+                                <span id="neracaLaba">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-indigo-400 pt-2 border-t border-slate-800">
+                                <span>TOTAL LIABILITAS & EKUITAS</span>
+                                <span id="neracaTotalPasiva">Rp 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. ARUS KAS -->
+                <div id="reportView-aruskas" class="report-subview glass-card p-6 rounded-2xl max-w-3xl mx-auto space-y-4 hidden">
+                    <div class="text-center border-b border-slate-800 pb-4">
+                        <h3 id="reportCompany3" class="font-bold text-lg text-white">Jaya Maju Motor</h3>
+                        <p class="text-xs font-semibold text-teal-400 uppercase tracking-wider">LAPORAN ARUS KAS (METODE LANGSUNG)</p>
+                        <p class="text-[11px] text-slate-400">Untuk Periode yang Berakhir 31 Oktober 2026</p>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1">ARUS KAS DARI AKTIVITAS OPERASI</div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Penerimaan Kas dari Pelanggan (Sales & Jasa)</span>
+                            <span id="cfPenerimaan">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Pembayaran Kas untuk Pembelian Stok</span>
+                            <span id="cfPengeluaran">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-teal-400 pt-1 border-t border-slate-800">
+                            <span>Arus Kas Bersih dari Aktivitas Operasi</span>
+                            <span id="cfBersihOperasi">Rp 0</span>
+                        </div>
+
+                        <div class="font-bold text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-800 pb-1 pt-3">AKTIVITAS INVESTASI & PENDANAAN</div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Setoran Modal Awal</span>
+                            <span>Rp 50.000.000</span>
+                        </div>
+                        <div class="flex justify-between pl-4 text-slate-300">
+                            <span>Pembelian Peralatan Bengkel</span>
+                            <span>(Rp 15.000.000)</span>
+                        </div>
+
+                        <div class="flex justify-between text-sm font-bold bg-teal-950/60 p-3 rounded-xl border border-teal-800/80 text-emerald-400 mt-4">
+                            <span>SALDO KAS AKHIR PERIODE</span>
+                            <span id="cfSaldoKasAkhir">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PERUBAHAN EKUITAS -->
+                <div id="reportView-ekuitas" class="report-subview glass-card p-6 rounded-2xl max-w-3xl mx-auto space-y-4 hidden">
+                    <div class="text-center border-b border-slate-800 pb-4">
+                        <h3 id="reportCompany4" class="font-bold text-lg text-white">Jaya Maju Motor</h3>
+                        <p class="text-xs font-semibold text-teal-400 uppercase tracking-wider">LAPORAN PERUBAHAN EKUITAS</p>
+                        <p class="text-[11px] text-slate-400">Untuk Periode yang Berakhir 31 Oktober 2026</p>
+                    </div>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Modal Awal Pemilik (1 Oktober 2026)</span>
+                            <span>Rp 50.000.000</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Laba Bersih Periode Berjalan</span>
+                            <span id="eqLabaBersih">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Prive / Pengambilan Pribadi</span>
+                            <span>(Rp 0)</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-bold bg-indigo-950/60 p-3 rounded-xl border border-indigo-800/80 text-indigo-300 mt-4">
+                            <span>MODAL AKHIR PEMILIK (31 OKTOBER 2026)</span>
+                            <span id="eqModalAkhir">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. CALK SAK EMKM -->
+                <div id="reportView-calk" class="report-subview glass-card p-6 rounded-2xl max-w-3xl mx-auto space-y-4 text-xs leading-relaxed text-slate-300 hidden">
+                    <div class="text-center border-b border-slate-800 pb-4">
+                        <h3 id="reportCompany5" class="font-bold text-lg text-white">Jaya Maju Motor</h3>
+                        <p class="text-xs font-semibold text-teal-400 uppercase tracking-wider">CATATAN ATAS LAPORAN KEUANGAN (CALK)</p>
+                        <p class="text-[11px] text-slate-400">Berdasarkan Standar Akuntansi Keuangan Entitas Mikro, Kecil, dan Menengah (SAK EMKM)</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm mb-1">1. Umum Entitas</h4>
+                        <p class="text-slate-400">Entitas UMKM ini bergerak di bidang usaha kombinasi penjualan suku cadang/oli (Barang Dagangan) dan pelayanan perbaikan sepeda motor (Jasa Bengkel).</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm mb-1">2. Ikhtisar Kebijakan Akuntansi</h4>
+                        <p class="text-slate-400">Penyusunan laporan keuangan mengacu pada SAK EMKM. Penilaian persediaan dan HPP menggunakan metode perpetual berbasis **FIFO (First-In, First-Out)**. Pendapatan diakui saat transaksi kasir POS diselesaikan.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm mb-1">3. Rincian Pos Keuangan Utama</h4>
+                        <p class="text-slate-400">Kas dan bank mencerminkan saldo likuid dari aktivitas operasi kasir dan pembelian. Persediaan dinilai berdasarkan batch pembelian aktual. Seluruh transaksi telah diposting melalui jurnal umum otomatis dan buku besar.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- POS MODAL (DIRECT SALES) -->
+    <div id="posModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card w-full max-w-4xl h-[85vh] rounded-2xl flex flex-col overflow-hidden border border-slate-700">
+            <div class="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-cash-register text-teal-400"></i>
+                    <h3 class="font-bold text-white text-sm">Form Direct Sales / Kasir Interaktif (FIFO)</h3>
+                </div>
+                <button onclick="closePosModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex-1 flex overflow-hidden">
+                <div class="flex-1 p-4 flex flex-col border-r border-slate-800 overflow-y-auto custom-scrollbar">
+                    <div class="mb-3">
+                        <input type="text" id="posSearch" oninput="filterPosItems()" placeholder="Cari 10 Barang Dagangan atau 5 Jasa Servis..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-teal-500">
+                    </div>
+                    <div id="posItemsGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                </div>
+                <div class="w-80 p-4 bg-slate-900/50 flex flex-col justify-between">
+                    <div>
+                        <h4 class="font-bold text-white text-xs mb-3 border-b border-slate-800 pb-2">Keranjang Belanja</h4>
+                        <div id="posCartList" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-800 space-y-3">
+                        <div class="flex justify-between text-sm font-bold text-white">
+                            <span>Total Bayar</span>
+                            <span id="posTotal" class="text-teal-400">Rp 0</span>
+                        </div>
+                        <button onclick="processPosPayment()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-lg text-xs shadow-lg shadow-emerald-500/20">
+                            Bayar & Simpan (Auto Jurnal)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD PURCHASE MODAL -->
+    <div id="purchaseModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card w-full max-w-md p-6 rounded-2xl border border-slate-700 space-y-4">
+            <h3 class="font-bold text-white text-base">Tambah Transaksi Pembelian Stok</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Supplier</label>
+                <input type="text" id="pSup" value="PT Astra Otoparts" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Pilih Barang Dagangan</label>
+                <select id="pItem" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"></select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Jumlah (Qty)</label>
+                <input type="number" id="pQty" value="5" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Total Harga Pembelian (Rp)</label>
+                <input type="number" id="pTotal" value="240000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closePurchaseModal()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white">Batal</button>
+                <button onclick="saveNewPurchase()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold">Simpan Pembelian</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD ADJUSTMENT MODAL -->
+    <div id="adjustmentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card w-full max-w-md p-6 rounded-2xl border border-slate-700 space-y-4">
+            <h3 class="font-bold text-white text-base">Input Penyesuaian Stok Opnam</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Pilih Barang Dagangan</label>
+                <select id="aItem" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"></select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Jumlah Selisih Hilang/Rusak (Qty)</label>
+                <input type="number" id="aQty" value="1" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Total Kerugian Selisih (Rp)</label>
+                <input type="number" id="aLoss" value="30000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Keterangan Penyesuaian</label>
+                <input type="text" id="aNote" value="Kerusakan / Rusak Opnam" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeAdjustmentModal()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white">Batal</button>
+                <button onclick="saveNewAdjustment()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold">Simpan Penyesuaian</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD MASTER ITEM MODAL -->
+    <div id="masterModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card w-full max-w-md p-6 rounded-2xl border border-slate-700 space-y-4">
+            <h3 class="font-bold text-white text-base">Tambah Master Item Baru</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Kode Item (Misal: BRG-11 / JSA-06)</label>
+                <input type="text" id="mCode" placeholder="BRG-11" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Nama Item</label>
+                <input type="text" id="mName" placeholder="Nama Barang / Jasa" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Kategori</label>
+                <select id="mCat" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                    <option value="Merchandise">Merchandise (Barang Dagangan)</option>
+                    <option value="Jasa">Jasa Servis</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Harga Beli Dasar (Rp)</label>
+                <input type="number" id="mBuy" value="30000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Harga Jual (Rp)</label>
+                <input type="number" id="mSell" value="45000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Stok Awal</label>
+                <input type="number" id="mStock" value="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeMasterModal()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white">Batal</button>
+                <button onclick="saveNewMasterItem()" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg text-xs font-semibold">Simpan Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROFILE MODAL -->
+    <div id="profileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="glass-card w-full max-w-md p-6 rounded-2xl border border-slate-700 space-y-4">
+            <h3 class="font-bold text-white text-base">Pengaturan Profil UMKM</h3>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Nama Pengelola</label>
+                <input type="text" id="editName" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">Nama Usaha UMKM / Bengkel</label>
+                <input type="text" id="editBusiness" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeProfileModal()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white">Batal</button>
+                <button onclick="saveProfile()" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg text-xs font-semibold">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APPLICATION SCRIPT ENGINE -->
+    <script>
+        const COA_LIST = [
+            { code: '1110', name: 'Kas & Bank' },
+            { code: '1130', name: 'Persediaan Barang Dagangan' },
+            { code: '1150', name: 'Perlengkapan' },
+            { code: '1210', name: 'Peralatan & Mesin Bengkel' },
+            { code: '1220', name: 'Akumulasi Penyusutan Peralatan' },
+            { code: '2110', name: 'Utang Usaha' },
+            { code: '2120', name: 'Utang Bank Jangka Pendek' },
+            { code: '3110', name: 'Modal Pemilik' },
+            { code: '3120', name: 'Prive Pemilik' },
+            { code: '4110', name: 'Pendapatan Penjualan Barang' },
+            { code: '4210', name: 'Pendapatan Jasa Servis' },
+            { code: '5110', name: 'Harga Pokok Penjualan (HPP FIFO)' },
+            { code: '5210', name: 'Beban Gaji Karyawan' },
+            { code: '5220', name: 'Beban Sewa Ruangan' },
+            { code: '5230', name: 'Beban Listrik & Air' },
+            { code: '5240', name: 'Beban Penyusutan Peralatan' },
+            { code: '5250', name: 'Beban Kerugian Selisih Persediaan (Opnam)' }
+        ];
+
+        const DEFAULT_ITEMS = [
+            { id: 'BRG-01', name: 'Oli Mesin MPX2 Matic 0.8L', category: 'Merchandise', buyPrice: 48000, sellPrice: 58000, stock: 25 },
+            { id: 'BRG-02', name: 'Kampas Rem Depan Vario', category: 'Merchandise', buyPrice: 30000, sellPrice: 42000, stock: 18 },
+            { id: 'BRG-03', name: 'Kampas Rem Belakang Beat', category: 'Merchandise', buyPrice: 28000, sellPrice: 38000, stock: 12 },
+            { id: 'BRG-04', name: 'Busi Honda NGK CPR9', category: 'Merchandise', buyPrice: 15000, sellPrice: 25000, stock: 30 },
+            { id: 'BRG-05', name: 'Ban Luar Tubeless 90/90-14', category: 'Merchandise', buyPrice: 160000, sellPrice: 210000, stock: 8 },
+            { id: 'BRG-06', name: 'Aki Motor GS Astra YTZ5S', category: 'Merchandise', buyPrice: 180000, sellPrice: 230000, stock: 6 },
+            { id: 'BRG-07', name: 'V-Belt Kit Vario 125', category: 'Merchandise', buyPrice: 130000, sellPrice: 175000, stock: 10 },
+            { id: 'BRG-08', name: 'Roller Set Beat FI', category: 'Merchandise', buyPrice: 40000, sellPrice: 60000, stock: 15 },
+            { id: 'BRG-09', name: 'Filter Udara Mio M3', category: 'Merchandise', buyPrice: 32000, sellPrice: 48000, stock: 14 },
+            { id: 'BRG-10', name: 'Oli Gear Gardan 120ml', category: 'Merchandise', buyPrice: 14000, sellPrice: 20000, stock: 40 },
+
+            { id: 'JSA-01', name: 'Jasa Servis Berkala / Tune Up', category: 'Jasa', buyPrice: 0, sellPrice: 45000, stock: 999 },
+            { id: 'JSA-02', name: 'Jasa Servis CVT Matic', category: 'Jasa', buyPrice: 0, sellPrice: 35000, stock: 999 },
+            { id: 'JSA-03', name: 'Jasa Ganti Oli & Checkup', category: 'Jasa', buyPrice: 0, sellPrice: 15000, stock: 999 },
+            { id: 'JSA-04', name: 'Jasa Bongkar Pasang Ban', category: 'Jasa', buyPrice: 0, sellPrice: 20000, stock: 999 },
+            { id: 'JSA-05', name: 'Jasa Overhaul Mesin Ringan', category: 'Jasa', buyPrice: 0, sellPrice: 150000, stock: 999 }
+        ];
+
+        const DEFAULT_PURCHASES = [
+            { id: 'PUR-01', date: '2026-10-01', supplier: 'PT Astra Otoparts', itemId: 'BRG-01', qty: 10, total: 480000 },
+            { id: 'PUR-02', date: '2026-10-02', supplier: 'Grosir Rem Jaya', itemId: 'BRG-02', qty: 5, total: 150000 },
+            { id: 'PUR-03', date: '2026-10-03', supplier: 'Grosir Rem Jaya', itemId: 'BRG-03', qty: 5, total: 140000 },
+            { id: 'PUR-04', date: '2026-10-04', supplier: 'Distributor Busi Indo', itemId: 'BRG-04', qty: 20, total: 300000 },
+            { id: 'PUR-05', date: '2026-10-05', supplier: 'Pabrik Ban Tubeless', itemId: 'BRG-05', qty: 4, total: 640000 },
+            { id: 'PUR-06', date: '2026-10-06', supplier: 'PT GS Battery', itemId: 'BRG-06', qty: 3, total: 540000 },
+            { id: 'PUR-07', date: '2026-10-07', supplier: 'Distributor V-Belt', itemId: 'BRG-07', qty: 4, total: 520000 },
+            { id: 'PUR-08', date: '2026-10-08', supplier: 'Grosir Part Matic', itemId: 'BRG-08', qty: 10, total: 400000 },
+            { id: 'PUR-09', date: '2026-10-09', supplier: 'Grosir Filter Indo', itemId: 'BRG-09', qty: 8, total: 256000 },
+            { id: 'PUR-10', date: '2026-10-10', supplier: 'PT Astra Otoparts', itemId: 'BRG-10', qty: 15, total: 210000 }
+        ];
+
+        const DEFAULT_SALES = [
+            { id: 'SLS-01', date: '2026-10-11', customer: 'Bpk. Ahmad', itemId: 'BRG-01', qty: 1, total: 58000, hpp: 48000 },
+            { id: 'SLS-02', date: '2026-10-12', customer: 'Bpk. Ahmad', itemId: 'JSA-01', qty: 1, total: 45000, hpp: 0 },
+            { id: 'SLS-03', date: '2026-10-13', customer: 'Ibu Rina', itemId: 'BRG-02', qty: 1, total: 42000, hpp: 30000 },
+            { id: 'SLS-04', date: '2026-10-14', customer: 'Ibu Rina', itemId: 'JSA-03', qty: 1, total: 15000, hpp: 0 },
+            { id: 'SLS-05', date: '2026-10-15', customer: 'Sdr. Doni', itemId: 'BRG-05', qty: 1, total: 210000, hpp: 160000 },
+            { id: 'SLS-06', date: '2026-10-16', customer: 'Sdr. Doni', itemId: 'JSA-04', qty: 1, total: 20000, hpp: 0 },
+            { id: 'SLS-07', date: '2026-10-17', customer: 'Bpk. Eko', itemId: 'BRG-08', qty: 1, total: 60000, hpp: 40000 },
+            { id: 'SLS-08', date: '2026-10-18', customer: 'Bpk. Eko', itemId: 'JSA-02', qty: 1, total: 35000, hpp: 0 },
+            { id: 'SLS-09', date: '2026-10-19', customer: 'Sdr. Hendra', itemId: 'BRG-06', qty: 1, total: 230000, hpp: 180000 },
+            { id: 'SLS-10', date: '2026-10-20', customer: 'Sdr. Hendra', itemId: 'JSA-05', qty: 1, total: 150000, hpp: 0 }
+        ];
+
+        const DEFAULT_ADJUSTMENTS = [
+            { id: 'ADJ-01', date: '2026-10-21', itemId: 'BRG-01', qtyLost: 1, lossValue: 48000, note: 'Bocor Kemasan' },
+            { id: 'ADJ-02', date: '2026-10-22', itemId: 'BRG-02', qtyLost: 1, lossValue: 30000, note: 'Selisih Stok Opnam' },
+            { id: 'ADJ-03', date: '2026-10-23', itemId: 'BRG-03', qtyLost: 1, lossValue: 28000, note: 'Karat Cacat Pabrik' },
+            { id: 'ADJ-04', date: '2026-10-24', itemId: 'BRG-04', qtyLost: 2, lossValue: 30000, note: 'Keramik Pecah' },
+            { id: 'ADJ-05', date: '2026-10-25', itemId: 'BRG-05', qtyLost: 1, lossValue: 160000, note: 'Ban Tertusuk Cacat' },
+            { id: 'ADJ-06', date: '2026-10-26', itemId: 'BRG-06', qtyLost: 1, lossValue: 180000, note: 'Aki Drop Retur' },
+            { id: 'ADJ-07', date: '2026-10-27', itemId: 'BRG-07', qtyLost: 1, lossValue: 130000, note: 'Kemasan Sobek' },
+            { id: 'ADJ-08', date: '2026-10-28', itemId: 'BRG-08', qtyLost: 1, lossValue: 40000, note: 'Pecah Casing' },
+            { id: 'ADJ-09', date: '2026-10-29', itemId: 'BRG-09', qtyLost: 1, lossValue: 32000, note: 'Kotor Rusak' },
+            { id: 'ADJ-10', date: '2026-10-30', itemId: 'BRG-10', qtyLost: 1, lossValue: 14000, note: 'Kemasan Bocor' }
+        ];
+
+        let currentUser = JSON.parse(localStorage.getItem('finpro_user')) || null;
+        let items = loadSanitizedData('finpro_items', DEFAULT_ITEMS);
+        let purchases = loadSanitizedData('finpro_purchases', DEFAULT_PURCHASES);
+        let sales = loadSanitizedData('finpro_sales', DEFAULT_SALES);
+        let adjustments = loadSanitizedData('finpro_adjustments', DEFAULT_ADJUSTMENTS);
+        let posCart = [];
+
+        function loadSanitizedData(key, fallback) {
+            try {
+                let data = JSON.parse(localStorage.getItem(key));
+                if (!Array.isArray(data) || data.length === 0) return fallback;
+                return data;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        window.onload = function() {
+            if (currentUser) {
+                showMainApp();
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
+            }
+        };
+
+        function handleLogin(e) {
+            e.preventDefault();
+            currentUser = {
+                name: 'Budi Santoso',
+                email: document.getElementById('loginEmail').value,
+                business: 'Jaya Maju Motor'
+            };
+            localStorage.setItem('finpro_user', JSON.stringify(currentUser));
+            showMainApp();
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            currentUser = {
+                name: document.getElementById('regName').value,
+                email: document.getElementById('regEmail').value,
+                business: document.getElementById('regBusiness').value
+            };
+            localStorage.setItem('finpro_user', JSON.stringify(currentUser));
+            showMainApp();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('finpro_user');
+            location.reload();
+        }
+
+        function toggleAuthMode(mode) {
+            if (mode === 'register') {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+            } else {
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('loginForm').classList.remove('hidden');
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('userNameDisplay').innerText = currentUser.name;
+            document.getElementById('userBusinessDisplay').innerText = currentUser.business;
+            document.getElementById('userAvatar').innerText = currentUser.name.charAt(0);
+            document.getElementById('headerBusinessSubtitle').innerText = `Usaha: ${currentUser.business} (Sistem SAK EMKM)`;
+
+            ['reportCompany1','reportCompany2','reportCompany3','reportCompany4','reportCompany5'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = currentUser.business;
+            });
+
+            renderDashboard();
+            renderMasterTable();
+            renderPurchaseTable();
+            renderAdjustmentTable();
+            renderJournals();
+            populateLedgerCoaOptions();
+            renderTrialBalance();
+            renderFinancialReports();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('bg-slate-800', 'text-white'));
+            
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            const activeNav = document.getElementById('nav-' + tabId);
+            if (activeNav) activeNav.classList.add('bg-slate-800', 'text-white');
+
+            const titles = {
+                dashboard: 'Dashboard Keuangan UMKM',
+                master: 'Master Data Barang Dagangan & Jasa',
+                purchases: 'Pembelian Stok Barang (Purchases)',
+                adjustments: 'Penyesuaian Stok Opnam Persediaan',
+                journals: 'Jurnal Umum & Penyesuaian Otomatis',
+                ledger: 'Buku Besar Per Akun (General Ledger)',
+                trialbalance: 'Neraca Saldo & NSSP (Kertas Kerja)',
+                financials: 'Laporan Keuangan & CALK SAK EMKM'
+            };
+            document.getElementById('pageTitle').innerText = titles[tabId] || 'Sistem UMKM';
+        }
+
+        function calculateFinancials() {
+            let totalSalesRevenue = 0;
+            let totalServiceRevenue = 0;
+            let totalHpp = 0;
+
+            sales.forEach(s => {
+                const val = Number(s.total) || 0;
+                const h = Number(s.hpp) || 0;
+                const item = items.find(i => i.id === s.itemId);
+                if ((item && item.category === 'Jasa') || (s.itemId && s.itemId.startsWith('JSA'))) {
+                    totalServiceRevenue += val;
+                } else {
+                    totalSalesRevenue += val;
+                    totalHpp += h;
+                }
+            });
+
+            let totalAdjustments = adjustments.reduce((acc, a) => acc + (Number(a.lossValue) || 0), 0);
+            let totalPurchases = purchases.reduce((acc, p) => acc + (Number(p.total) || 0), 0);
+            
+            let initialInventory = 15000000;
+            let currentInventoryValue = initialInventory + totalPurchases - totalHpp - totalAdjustments;
+
+            let totalRevenue = totalSalesRevenue + totalServiceRevenue;
+            let totalExpenses = totalHpp + totalAdjustments;
+            let netProfit = totalRevenue - totalExpenses;
+
+            let cashFromOperations = totalRevenue - totalPurchases;
+            let finalCash = 35000000 + cashFromOperations;
+
+            let totalAset = finalCash + currentInventoryValue + 15000000;
+            let totalPasiva = 50000000 + netProfit;
+
+            let currentRatio = totalAset > 0 ? (finalCash / (totalPasiva > 0 ? totalPasiva * 0.1 : 1)).toFixed(1) + 'x' : '2.0x';
+            let netMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) + '%' : '0%';
+            let roa = totalAset > 0 ? ((netProfit / totalAset) * 100).toFixed(1) + '%' : '0%';
+            let der = totalAset > 0 ? ((0 / totalPasiva) * 100).toFixed(2) + 'x' : '0.0x';
+
+            return {
+                totalSalesRevenue,
+                totalServiceRevenue,
+                totalRevenue,
+                totalHpp,
+                totalAdjustments,
+                totalExpenses,
+                netProfit,
+                currentInventoryValue,
+                finalCash,
+                totalPurchases,
+                totalAset,
+                totalPasiva,
+                currentRatio,
+                netMargin,
+                roa,
+                der
+            };
+        }
+
+        function renderDashboard() {
+            const fin = calculateFinancials();
+
+            document.getElementById('dashKas').innerText = formatRp(fin.finalCash);
+            document.getElementById('dashPersediaan').innerText = formatRp(fin.currentInventoryValue);
+            document.getElementById('dashPendapatan').innerText = formatRp(fin.totalRevenue);
+            document.getElementById('dashLaba').innerText = formatRp(fin.netProfit);
+
+            document.getElementById('ratioCash').innerText = fin.currentRatio + ' (Sehat)';
+            document.getElementById('ratioMargin').innerText = fin.netMargin;
+            document.getElementById('ratioRoa').innerText = fin.roa;
+            document.getElementById('ratioDer').innerText = fin.der;
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pendap. Penjualan', 'Pendap. Jasa', 'HPP (FIFO)', 'Beban Opnam'],
+                    datasets: [{
+                        label: 'Nilai (Rp)',
+                        data: [fin.totalSalesRevenue, fin.totalServiceRevenue, fin.totalHpp, fin.totalAdjustments],
+                        backgroundColor: ['#14b8a6', '#6366f1', '#ef4444', '#f59e0b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function renderMasterTable() {
+            const tbody = document.getElementById('masterTableBody');
+            tbody.innerHTML = items.map(item => `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400 font-bold">${item.id}</td>
+                    <td class="p-3 font-medium text-white">${item.name}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] ${item.category==='Jasa'?'bg-purple-950 text-purple-300':'bg-teal-950 text-teal-300'}">${item.category}</span></td>
+                    <td class="p-3">${item.category==='Jasa'?'-':formatRp(item.buyPrice)}</td>
+                    <td class="p-3 font-semibold text-emerald-400">${formatRp(item.sellPrice)}</td>
+                    <td class="p-3">${item.category==='Jasa'?'∞':item.stock}</td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="deleteMasterItem('${item.id}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPurchaseTable() {
+            const tbody = document.getElementById('purchaseTableBody');
+            tbody.innerHTML = purchases.map(p => {
+                const item = items.find(i => i.id === p.itemId);
+                return `
+                    <tr class="hover:bg-slate-800/50">
+                        <td class="p-3 font-mono text-indigo-400">${p.id}</td>
+                        <td class="p-3">${p.date}</td>
+                        <td class="p-3 text-white">${p.supplier}</td>
+                        <td class="p-3">${item ? item.name : p.itemId}</td>
+                        <td class="p-3 font-bold">${p.qty}</td>
+                        <td class="p-3 text-emerald-400 font-semibold">${formatRp(p.total)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deletePurchase('${p.id}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderAdjustmentTable() {
+            const tbody = document.getElementById('adjustmentTableBody');
+            tbody.innerHTML = adjustments.map(a => {
+                const item = items.find(i => i.id === a.itemId);
+                return `
+                    <tr class="hover:bg-slate-800/50">
+                        <td class="p-3 font-mono text-amber-400">${a.id}</td>
+                        <td class="p-3">${a.date}</td>
+                        <td class="p-3 text-white">${item ? item.name : a.itemId}</td>
+                        <td class="p-3 font-bold text-red-400">-${a.qtyLost || 1}</td>
+                        <td class="p-3 text-red-400 font-semibold">${formatRp(a.lossValue)}</td>
+                        <td class="p-3 text-slate-400">${a.note || 'Opnam Persediaan'}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteAdjustment('${a.id}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderJournals() {
+            const tbody = document.getElementById('journalTableBody');
+            let rows = [];
+
+            purchases.forEach(p => {
+                rows.push(`
+                    <tr class="bg-slate-900/40 border-t border-slate-800">
+                        <td class="p-3">${p.date}</td>
+                        <td class="p-3 font-mono text-indigo-400">${p.id}</td>
+                        <td class="p-3 font-bold text-white">1130 Persediaan Barang Dagangan</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(p.total)}</td>
+                        <td class="p-3 text-right">-</td>
+                    </tr>
+                    <tr class="bg-slate-900/40">
+                        <td class="p-3"></td>
+                        <td class="p-3"></td>
+                        <td class="p-3 pl-8 text-slate-400">1110 Kas & Bank</td>
+                        <td class="p-3 text-right">-</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(p.total)}</td>
+                    </tr>
+                `);
+            });
+
+            sales.forEach(s => {
+                const item = items.find(i => i.id === s.itemId);
+                const isJasa = (item && item.category === 'Jasa') || (s.itemId && s.itemId.startsWith('JSA'));
+                const revAccount = isJasa ? '4210 Pendapatan Jasa Servis' : '4110 Pendapatan Penjualan Barang';
+
+                rows.push(`
+                    <tr class="bg-slate-900/40 border-t border-slate-800">
+                        <td class="p-3">${s.date}</td>
+                        <td class="p-3 font-mono text-teal-400">${s.id}</td>
+                        <td class="p-3 font-bold text-white">1110 Kas & Bank</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(s.total)}</td>
+                        <td class="p-3 text-right">-</td>
+                    </tr>
+                    <tr class="bg-slate-900/40">
+                        <td class="p-3"></td>
+                        <td class="p-3"></td>
+                        <td class="p-3 pl-8 text-slate-400">${revAccount}</td>
+                        <td class="p-3 text-right">-</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(s.total)}</td>
+                    </tr>
+                `);
+
+                if (!isJasa && s.hpp > 0) {
+                    rows.push(`
+                        <tr class="bg-slate-900/20">
+                            <td class="p-3"></td>
+                            <td class="p-3"></td>
+                            <td class="p-3 font-bold text-white">5110 Harga Pokok Penjualan (HPP FIFO)</td>
+                            <td class="p-3 text-right text-emerald-400">${formatRp(s.hpp)}</td>
+                            <td class="p-3 text-right">-</td>
+                        </tr>
+                        <tr class="bg-slate-900/20">
+                            <td class="p-3"></td>
+                            <td class="p-3"></td>
+                            <td class="p-3 pl-8 text-slate-400">1130 Persediaan Barang Dagangan</td>
+                            <td class="p-3 text-right">-</td>
+                            <td class="p-3 text-right text-emerald-400">${formatRp(s.hpp)}</td>
+                        </tr>
+                    `);
+                }
+            });
+
+            adjustments.forEach(a => {
+                rows.push(`
+                    <tr class="bg-slate-900/40 border-t border-slate-800">
+                        <td class="p-3">${a.date}</td>
+                        <td class="p-3 font-mono text-amber-400">${a.id}</td>
+                        <td class="p-3 font-bold text-white">5250 Beban Kerugian Selisih Persediaan</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(a.lossValue)}</td>
+                        <td class="p-3 text-right">-</td>
+                    </tr>
+                    <tr class="bg-slate-900/40">
+                        <td class="p-3"></td>
+                        <td class="p-3"></td>
+                        <td class="p-3 pl-8 text-slate-400">1130 Persediaan Barang Dagangan</td>
+                        <td class="p-3 text-right">-</td>
+                        <td class="p-3 text-right text-emerald-400">${formatRp(a.lossValue)}</td>
+                    </tr>
+                `);
+            });
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        function renderTrialBalance() {
+            const tbody = document.getElementById('trialBalanceTableBody');
+            const fin = calculateFinancials();
+
+            tbody.innerHTML = `
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">1110</td>
+                    <td class="p-3 text-white font-semibold">Kas & Bank</td>
+                    <td class="p-3 text-right">${formatRp(fin.finalCash)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.finalCash)}</td>
+                    <td class="p-3 text-right">-</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">1130</td>
+                    <td class="p-3 text-white font-semibold">Persediaan Barang Dagangan (FIFO)</td>
+                    <td class="p-3 text-right">${formatRp(fin.currentInventoryValue + fin.totalAdjustments)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right text-red-400">${formatRp(fin.totalAdjustments)}</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.currentInventoryValue)}</td>
+                    <td class="p-3 text-right">-</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">1210</td>
+                    <td class="p-3 text-white font-semibold">Peralatan & Mesin Bengkel</td>
+                    <td class="p-3 text-right">Rp 15.000.000</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">Rp 15.000.000</td>
+                    <td class="p-3 text-right">-</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">3110</td>
+                    <td class="p-3 text-white font-semibold">Modal Pemilik</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">Rp 50.000.000</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">Rp 50.000.000</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">4110</td>
+                    <td class="p-3 text-white font-semibold">Pendapatan Penjualan Barang</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">${formatRp(fin.totalSalesRevenue)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.totalSalesRevenue)}</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">4210</td>
+                    <td class="p-3 text-white font-semibold">Pendapatan Jasa Servis</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">${formatRp(fin.totalServiceRevenue)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.totalServiceRevenue)}</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">5110</td>
+                    <td class="p-3 text-white font-semibold">Harga Pokok Penjualan (HPP FIFO)</td>
+                    <td class="p-3 text-right">${formatRp(fin.totalHpp)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.totalHpp)}</td>
+                    <td class="p-3 text-right">-</td>
+                </tr>
+                <tr class="hover:bg-slate-800/50">
+                    <td class="p-3 font-mono text-teal-400">5250</td>
+                    <td class="p-3 text-white font-semibold">Beban Kerugian Selisih Persediaan</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right text-emerald-400">${formatRp(fin.totalAdjustments)}</td>
+                    <td class="p-3 text-right">-</td>
+                    <td class="p-3 text-right font-bold text-emerald-400">${formatRp(fin.totalAdjustments)}</td>
+                    <td class="p-3 text-right">-</td>
+                </tr>
+            `;
+        }
+
+        function populateLedgerCoaOptions() {
+            const select = document.getElementById('ledgerCoaFilter');
+            select.innerHTML = COA_LIST.map(c => `<option value="${c.code}">${c.code} - ${c.name}</option>`).join('');
+            renderLedger();
+        }
+
+        function renderLedger() {
+            const code = document.getElementById('ledgerCoaFilter').value;
+            const tbody = document.getElementById('ledgerTableBody');
+
+            let balance = 0;
+            let rows = [];
+
+            if (code === '1110') {
+                balance = 35000000;
+                rows.push(`<tr><td class="p-3">2026-10-01</td><td class="p-3">-</td><td class="p-3 font-bold">Saldo Awal Kas</td><td class="p-3 text-right">-</td><td class="p-3 text-right">-</td><td class="p-3 text-right font-bold text-teal-400">${formatRp(balance)}</td></tr>`);
+                
+                sales.forEach(s => {
+                    balance += Number(s.total) || 0;
+                    rows.push(`<tr><td class="p-3">${s.date}</td><td class="p-3 font-mono">${s.id}</td><td class="p-3">Penjualan POS / Servis</td><td class="p-3 text-right text-emerald-400">${formatRp(s.total)}</td><td class="p-3 text-right">-</td><td class="p-3 text-right font-bold">${formatRp(balance)}</td></tr>`);
+                });
+
+                purchases.forEach(p => {
+                    balance -= Number(p.total) || 0;
+                    rows.push(`<tr><td class="p-3">${p.date}</td><td class="p-3 font-mono">${p.id}</td><td class="p-3">Pembelian Stok Barang</td><td class="p-3 text-right">-</td><td class="p-3 text-right text-red-400">${formatRp(p.total)}</td><td class="p-3 text-right font-bold">${formatRp(balance)}</td></tr>`);
+                });
+            } else {
+                rows.push(`<tr><td colspan="6" class="p-4 text-center text-slate-500">Mutasi transaksi terhitung otomatis ke dalam saldo buku besar SAK EMKM.</td></tr>`);
+            }
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        function renderFinancialReports() {
+            const fin = calculateFinancials();
+
+            // 1. LABA RUGI
+            document.getElementById('rptSalesRev').innerText = formatRp(fin.totalSalesRevenue);
+            document.getElementById('rptServiceRev').innerText = formatRp(fin.totalServiceRevenue);
+            document.getElementById('rptTotalRev').innerText = formatRp(fin.totalRevenue);
+            document.getElementById('rptHpp').innerText = formatRp(fin.totalHpp);
+            document.getElementById('rptBebanAdjustment').innerText = formatRp(fin.totalAdjustments);
+            document.getElementById('rptTotalExpense').innerText = formatRp(fin.totalExpenses);
+            document.getElementById('rptNetProfit').innerText = formatRp(fin.netProfit);
+
+            // 2. NERACA
+            document.getElementById('neracaKas').innerText = formatRp(fin.finalCash);
+            document.getElementById('neracaPersediaan').innerText = formatRp(fin.currentInventoryValue);
+            document.getElementById('neracaTotalAset').innerText = formatRp(fin.totalAset);
+            document.getElementById('neracaLaba').innerText = formatRp(fin.netProfit);
+            document.getElementById('neracaTotalPasiva').innerText = formatRp(fin.totalPasiva);
+
+            // 3. ARUS KAS
+            document.getElementById('cfPenerimaan').innerText = formatRp(fin.totalRevenue);
+            document.getElementById('cfPengeluaran').innerText = `(${formatRp(fin.totalPurchases)})`;
+            document.getElementById('cfBersihOperasi').innerText = formatRp(fin.totalRevenue - fin.totalPurchases);
+            document.getElementById('cfSaldoKasAkhir').innerText = formatRp(fin.finalCash);
+
+            // 4. EKUITAS
+            document.getElementById('eqLabaBersih').innerText = formatRp(fin.netProfit);
+            document.getElementById('eqModalAkhir').innerText = formatRp(50000000 + fin.netProfit);
+        }
+
+        function switchReportTab(reportName) {
+            document.querySelectorAll('.report-subview').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.report-tab-btn').forEach(el => {
+                el.classList.remove('bg-teal-500', 'text-white');
+                el.classList.add('text-slate-400');
+            });
+
+            document.getElementById('reportView-' + reportName).classList.remove('hidden');
+            const activeBtn = document.getElementById('reportTab-' + reportName);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-teal-500', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        // POS KASIR (DIRECT SALES)
+        function openPosModal() {
+            document.getElementById('posModal').classList.remove('hidden');
+            filterPosItems();
+            renderPosCart();
+        }
+
+        function closePosModal() {
+            document.getElementById('posModal').classList.add('hidden');
+        }
+
+        function filterPosItems() {
+            const query = document.getElementById('posSearch').value.toLowerCase();
+            const grid = document.getElementById('posItemsGrid');
+            const filtered = items.filter(i => i.name.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+
+            grid.innerHTML = filtered.map(item => `
+                <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 hover:border-teal-500/50 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[9px] px-1.5 py-0.5 rounded ${item.category==='Jasa'?'bg-purple-950 text-purple-300':'bg-teal-950 text-teal-300'} font-semibold">${item.category}</span>
+                        <h5 class="text-xs font-bold text-white mt-1 leading-tight">${item.name}</h5>
+                        <p class="text-[10px] text-slate-400 mt-1">${item.category==='Jasa'?'Pelayanan':'Stok FIFO: '+item.stock}</p>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between border-t border-slate-800/80 pt-2">
+                        <span class="text-xs font-bold text-emerald-400">${formatRp(item.sellPrice)}</span>
+                        <button onclick="addToCart('${item.id}')" class="bg-teal-500 hover:bg-teal-600 text-white w-6 h-6 rounded-lg flex items-center justify-center text-xs">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(itemId) {
+            const item = items.find(i => i.id === itemId);
+            if (!item) return;
+
+            const existing = posCart.find(c => c.itemId === itemId);
+            if (existing) {
+                existing.qty++;
+            } else {
+                posCart.push({ itemId: item.id, name: item.name, price: item.sellPrice, buyPrice: item.buyPrice, qty: 1 });
+            }
+            renderPosCart();
+        }
+
+        function renderPosCart() {
+            const cartList = document.getElementById('posCartList');
+            let total = 0;
+
+            cartList.innerHTML = posCart.map((c, idx) => {
+                const subtotal = c.price * c.qty;
+                total += subtotal;
+                return `
+                    <div class="flex items-center justify-between bg-slate-800/60 p-2 rounded-lg text-xs">
+                        <div class="overflow-hidden pr-2">
+                            <p class="font-bold text-white truncate">${c.name}</p>
+                            <p class="text-[10px] text-slate-400">${formatRp(c.price)} x ${c.qty}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-semibold text-emerald-400 text-xs">${formatRp(subtotal)}</span>
+                            <button onclick="removeFromCart(${idx})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('posTotal').innerText = formatRp(total);
+        }
+
+        function removeFromCart(index) {
+            posCart.splice(index, 1);
+            renderPosCart();
+        }
+
+        function processPosPayment() {
+            if (posCart.length === 0) {
+                alert('Keranjang belanja masih kosong!');
+                return;
+            }
+
+            const now = new Date().toISOString().split('T')[0];
+            posCart.forEach(c => {
+                sales.push({
+                    id: 'SLS-' + String(sales.length + 1).padStart(2, '0'),
+                    date: now,
+                    customer: 'Pelanggan POS Direct',
+                    itemId: c.itemId,
+                    qty: c.qty,
+                    total: c.price * c.qty,
+                    hpp: c.buyPrice * c.qty
+                });
+
+                const masterItem = items.find(i => i.id === c.itemId);
+                if (masterItem && masterItem.category !== 'Jasa') {
+                    masterItem.stock = Math.max(0, masterItem.stock - c.qty);
+                }
+            });
+
+            saveAllData();
+            posCart = [];
+            closePosModal();
+            showMainApp();
+            alert('Transaksi Direct Sales FIFO berhasil diproses!');
+        }
+
+        // ADD PURCHASE MODAL & FUNCTION
+        function openPurchaseModal() {
+            const select = document.getElementById('pItem');
+            select.innerHTML = items.filter(i => i.category !== 'Jasa').map(i => `<option value="${i.id}">${i.name} (Stok: ${i.stock})</option>`).join('');
+            document.getElementById('purchaseModal').classList.remove('hidden');
+        }
+
+        function closePurchaseModal() {
+            document.getElementById('purchaseModal').classList.add('hidden');
+        }
+
+        function saveNewPurchase() {
+            const sup = document.getElementById('pSup').value || 'Supplier Umum';
+            const itemId = document.getElementById('pItem').value;
+            const qty = Number(document.getElementById('pQty').value) || 1;
+            const total = Number(document.getElementById('pTotal').value) || 100000;
+            const now = new Date().toISOString().split('T')[0];
+
+            purchases.push({
+                id: 'PUR-' + String(purchases.length + 1).padStart(2, '0'),
+                date: now,
+                supplier: sup,
+                itemId: itemId,
+                qty: qty,
+                total: total
+            });
+
+            const item = items.find(i => i.id === itemId);
+            if (item) {
+                item.stock += qty;
+                item.buyPrice = Math.round(total / qty);
+            }
+
+            saveAllData();
+            closePurchaseModal();
+            showMainApp();
+            alert('Transaksi pembelian stok berhasil dicatat!');
+        }
+
+        // ADD ADJUSTMENT MODAL & FUNCTION
+        function openAdjustmentModal() {
+            const select = document.getElementById('aItem');
+            select.innerHTML = items.filter(i => i.category !== 'Jasa').map(i => `<option value="${i.id}">${i.name} (Stok: ${i.stock})</option>`).join('');
+            document.getElementById('adjustmentModal').classList.remove('hidden');
+        }
+
+        function closeAdjustmentModal() {
+            document.getElementById('adjustmentModal').classList.add('hidden');
+        }
+
+        function saveNewAdjustment() {
+            const itemId = document.getElementById('aItem').value;
+            const qtyLost = Number(document.getElementById('aQty').value) || 1;
+            const lossValue = Number(document.getElementById('aLoss').value) || 30000;
+            const note = document.getElementById('aNote').value || 'Selisih Opnam';
+            const now = new Date().toISOString().split('T')[0];
+
+            adjustments.push({
+                id: 'ADJ-' + String(adjustments.length + 1).padStart(2, '0'),
+                date: now,
+                itemId: itemId,
+                qtyLost: qtyLost,
+                lossValue: lossValue,
+                note: note
+            });
+
+            const item = items.find(i => i.id === itemId);
+            if (item) {
+                item.stock = Math.max(0, item.stock - qtyLost);
+            }
+
+            saveAllData();
+            closeAdjustmentModal();
+            showMainApp();
+            alert('Transaksi penyesuaian stok opnam berhasil dicatat!');
+        }
+
+        // ADD MASTER ITEM MODAL & FUNCTION
+        function openMasterModal() {
+            document.getElementById('masterModal').classList.remove('hidden');
+        }
+
+        function closeMasterModal() {
+            document.getElementById('masterModal').classList.add('hidden');
+        }
+
+        function saveNewMasterItem() {
+            const code = document.getElementById('mCode').value || ('BRG-' + (items.length + 1));
+            const name = document.getElementById('mName').value || 'Item Baru';
+            const cat = document.getElementById('mCat').value;
+            const buy = Number(document.getElementById('mBuy').value) || 0;
+            const sell = Number(document.getElementById('mSell').value) || 0;
+            const stock = Number(document.getElementById('mStock').value) || 0;
+
+            items.push({
+                id: code,
+                name: name,
+                category: cat,
+                buyPrice: buy,
+                sellPrice: sell,
+                stock: stock
+            });
+
+            saveAllData();
+            closeMasterModal();
+            showMainApp();
+            alert('Master item berhasil ditambahkan!');
+        }
+
+        // DELETE CRUD
+        function deleteMasterItem(id) {
+            if (confirm(`Hapus item ${id}?`)) {
+                items = items.filter(i => i.id !== id);
+                saveAllData();
+                showMainApp();
+            }
+        }
+
+        function deletePurchase(id) {
+            if (confirm(`Hapus pembelian ${id}?`)) {
+                purchases = purchases.filter(p => p.id !== id);
+                saveAllData();
+                showMainApp();
+            }
+        }
+
+        function deleteAdjustment(id) {
+            if (confirm(`Hapus penyesuaian ${id}?`)) {
+                adjustments = adjustments.filter(a => a.id !== id);
+                saveAllData();
+                showMainApp();
+            }
+        }
+
+        // PROFILE & RESET
+        function openProfileModal() {
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editBusiness').value = currentUser.business;
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        function saveProfile() {
+            currentUser.name = document.getElementById('editName').value;
+            currentUser.business = document.getElementById('editBusiness').value;
+            localStorage.setItem('finpro_user', JSON.stringify(currentUser));
+            closeProfileModal();
+            showMainApp();
+        }
+
+        function saveAllData() {
+            localStorage.setItem('finpro_items', JSON.stringify(items));
+            localStorage.setItem('finpro_purchases', JSON.stringify(purchases));
+            localStorage.setItem('finpro_sales', JSON.stringify(sales));
+            localStorage.setItem('finpro_adjustments', JSON.stringify(adjustments));
+        }
+
+        function resetDataToDefault() {
+            localStorage.removeItem('finpro_items');
+            localStorage.removeItem('finpro_purchases');
+            localStorage.removeItem('finpro_sales');
+            localStorage.removeItem('finpro_adjustments');
+            items = DEFAULT_ITEMS;
+            purchases = DEFAULT_PURCHASES;
+            sales = DEFAULT_SALES;
+            adjustments = DEFAULT_ADJUSTMENTS;
+            saveAllData();
+            showMainApp();
+            alert('Seluruh data sampel dan pembukuan SAK EMKM telah di-reset dan dimuat ulang dengan sukses!');
+        }
+
+        function formatRp(val) {
+            const num = Number(val) || 0;
+            return 'Rp ' + num.toLocaleString('id-ID');
+        }
+    </script>
+</body>
+</html>
